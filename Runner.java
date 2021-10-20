@@ -17,7 +17,8 @@ public class Runner
             // open the file
             fileOutput = new FileWriter("output");
             // put some column headers in
-            fileOutput.write("randomSeed,nValue,searchesNotFound,bubSort,fastBubSort,linSearchMin,linSearchAvg,linSearchMax,binSearchMin,binSearchAvg,binSearchMax");
+            fileOutput.write("randomSeed,nValue,searchesNotFound,bubSort,fastBubSort,linSearchMin,linSearchAvg,linSearchMax,binSearchMin,binSearchAvg,binSearchMax,");
+            fileOutput.write("\n");
         }
         catch(Exception e){
             System.out.println("things broke");
@@ -65,7 +66,7 @@ public class Runner
                     numDone++;
                 }
             }
-            System.out.printf("Progress: %d3/%d3%n",numDone,threads.length);
+            System.out.printf("Progress: %3d/%3d%n",numDone,threads.length);
             if(numDone == threads.length){
                 // yes, we don't bother changing allDone.  i
                 // can never decide how to structure a loop like this
@@ -82,6 +83,14 @@ public class Runner
             }
         }
         System.out.println("goodbye!");
+        // Make sure the file is actually written, because Java is lazy
+        try{
+            fileOutput.close();
+        }
+        catch(Exception e){
+            System.out.println("couldn't write out data");
+            System.err.println(e);
+        }
     }
     
     /**
@@ -101,7 +110,7 @@ public class Runner
      * I pass it in as a parameter just to make it really clear that 
      * I know what firey torches I am juggling here.
      */
-    public static void runAndEvaluateSorts(int seed, int N, FileWriter w){
+    public static void runAndEvaluateSorts(int seed, int N, FileWriter writeMe){
         // we'll be using and re-using this variable, usually with the
         // same seed.
         Random numberForge = new Random(seed);
@@ -150,9 +159,14 @@ public class Runner
             linSearcher.run_algorithm();
             binSearcher.run_algorithm();
             
-            // see what we found
+            // see how long it took
             long linComplexity = linSearcher.result();
             long binComplexity = binSearcher.result();
+            
+            // check if the search failed
+            if(binSearcher.getLocatedIndex() == -1){
+                failedSearches++;
+            }
             
             // if it's the first loop, we need to properly
             // set up our maxs, mins, and avgs, so they aren't stuck
@@ -181,12 +195,9 @@ public class Runner
             // of the rest of the list multiplied by the number of elements
             // so, we do that, add our new element, and then divide
             linearAvg = (linearAvg * i + linComplexity) / (i+1);
-            binaryAvg = (linearAvg * i + binComplexity) / (i+1);
+            binaryAvg = (binaryAvg * i + binComplexity) / (i+1);
             
-            // check if the search failed
-            if(binSearcher.getLocatedIndex() == -1){
-                failedSearches++;
-            }
+            
         }
         // Now, build a string that reflects our data: we need to print with one
         // funciton call, or else
@@ -217,9 +228,15 @@ public class Runner
         // and the binary
         csvFileLine += binaryMin + ",";
         csvFileLine += binaryAvg + ",";
-        csvFileLine += binaryMax + ",";
+        csvFileLine += binaryMax + ",\n";
         
-        
-        
+        // now, we write out the line
+        try{
+            writeMe.write(csvFileLine);
+        }
+        catch(Exception e){
+            System.out.println("a writing error has occured!");
+            System.err.println(e);
+        }
     }
 }
