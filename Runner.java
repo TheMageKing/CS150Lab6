@@ -71,6 +71,8 @@ public class Runner
                 // can never decide how to structure a loop like this
                 break;
             }
+            // now sleep for 5 secconds, give the threads time to actually run
+            Thread.sleep(5000);
         }
         System.out.println("goodbye!");
     }
@@ -126,9 +128,8 @@ public class Runner
         numberForge = new Random(seed+1);
         
         // declare the min/max/avg variables for the searches
-        // we initialize in the first loop
-        long linearMin,linearMax,linearAvg;
-        long binaryMin,binaryMax,binaryAvg;
+        long linearMin=0,linearMax=0,linearAvg=0;
+        long binaryMin=0,binaryMax=0,binaryAvg=0;
         
         // now, lets go!
         for(int i = 0; i < N; i++){
@@ -145,8 +146,35 @@ public class Runner
             long linComplexity = linSearcher.result();
             long binComplexity = binSearcher.result();
             
+            // if it's the first loop, we need to properly
+            // set up our maxs, mins, and avgs, so they aren't stuck
+            // at zero.
+            if(i == 0){
+                linearMin = linComplexity;
+                linearMax = linComplexity;
+                linearAvg = linComplexity;
+                binaryMin = binComplexity;
+                binaryMax = binComplexity;
+                binaryAvg = binComplexity;
+                // a divide-by-zero in the averaging code will result
+                // if we don't exit now
+                continue;
+            }
+            
             // update the maxes and mins accordingly
-            linearMin=Math.min(linearMin,linComplexity);
+            linearMin = Math.min(linearMin,linComplexity);
+            linearMax = Math.max(linearMax,linComplexity);
+            binaryMin = Math.min(binaryMin,binComplexity);
+            binaryMax = Math.max(binaryMax,binComplexity);
+            
+            // now, we calculate the average.
+            // when calculating an average after adding a value, 
+            // the sum of the rest of the list is equal to the average
+            // of the rest of the list multiplied by the number of elements
+            // so, we do that, add our new element, and then divide
+            linearAvg = (linearAvg * i + linComplexity) / (i+1);
+            binaryAvg = (linearAvg * i + binComplexity) / (i+1);
+            
         }
     }
 }
