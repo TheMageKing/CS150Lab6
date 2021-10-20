@@ -27,7 +27,7 @@ public class Runner
         }
         
         // get a list of the N-values we will be using
-        int[] nVals = {10,100,1_000,10_000,100_000,1_000_000};
+        int[] nVals = {10,100,1_000,10_000,100_000};//,1_000_000};
         
         // now, for the multithreading.  Lets make an array to hold the threads
         // I created.  this way, I can get a 'progress bar'
@@ -142,8 +142,15 @@ public class Runner
         numberForge = new Random(seed+1);
         
         // declare the min/max/avg variables for the searches
-        long linearMin=0,linearMax=0,linearAvg=0;
-        long binaryMin=0,binaryMax=0,binaryAvg=0;
+        long linearMin=0,linearMax=0;
+        long binaryMin=0,binaryMax=0;
+        
+        // use doubles for averages: this change was made after
+        // kicking off the million run on my desktop, so, if it
+        // finishes in time to make it into the report, the data 
+        // from it (over 100,000) will not contain decimals.
+        double linearAvg=0,binaryAvg=0;
+        
         int failedSearches = 0;
         
         // now, lets go!
