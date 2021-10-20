@@ -27,7 +27,7 @@ public class Runner
         }
         
         // get a list of the N-values we will be using
-        int[] nVals = {10,100,1_000,10_000,100_000};//,1_000_000};
+        int[] nVals = {10,100,1_000,10_000,100_000,1_000_000};
         
         // now, for the multithreading.  Lets make an array to hold the threads
         // I created.  this way, I can get a 'progress bar'
