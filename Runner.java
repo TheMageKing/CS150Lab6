@@ -66,13 +66,20 @@ public class Runner
                 }
             }
             System.out.printf("Progress: %d3/%d3%n",numDone,threads.length);
-            if(numDone == threads.length-1){
+            if(numDone == threads.length){
                 // yes, we don't bother changing allDone.  i
                 // can never decide how to structure a loop like this
                 break;
             }
             // now sleep for 5 secconds, give the threads time to actually run
-            Thread.sleep(5000);
+            try{
+                Thread.sleep(5000);
+            }
+            catch(Exception e){
+                // this can't happen, since we never use thread interrupts.
+                System.out.println("Danger: angry pixies");
+                return;
+            }
         }
         System.out.println("goodbye!");
     }
@@ -130,6 +137,7 @@ public class Runner
         // declare the min/max/avg variables for the searches
         long linearMin=0,linearMax=0,linearAvg=0;
         long binaryMin=0,binaryMax=0,binaryAvg=0;
+        int failedSearches = 0;
         
         // now, lets go!
         for(int i = 0; i < N; i++){
@@ -175,6 +183,43 @@ public class Runner
             linearAvg = (linearAvg * i + linComplexity) / (i+1);
             binaryAvg = (linearAvg * i + binComplexity) / (i+1);
             
+            // check if the search failed
+            if(binSearcher.getLocatedIndex() == -1){
+                failedSearches++;
+            }
         }
+        // Now, build a string that reflects our data: we need to print with one
+        // funciton call, or else
+        String csvFileLine = "";
+        
+        // the format is:
+//"randomSeed,nValue,searchesNotFound,bubSort,fastBubSort,linSearchMin,linSearchAvg,linSearchMax,binSearchMin,binSearchAvg,binSearchMax");
+        
+        // i hate repetition, but java doesn't provide a CSV class by default,
+        // and there's no way to add a function to do this without putting it
+        // in another class or making csvFileLine static.  making it static
+        // would make it impossible to synchronize with threads: making it in
+        // another class would violate the spec, which asks for all this stuff
+        // to be in one class
+        csvFileLine += seed + ",";
+        csvFileLine += N + ",";
+        csvFileLine += failedSearches + ",";
+        
+        // add the sort complexities
+        csvFileLine += bubSorter.result() + ",";
+        csvFileLine += fastSorter.result() + ",";
+        
+        // Now the linear search
+        csvFileLine += linearMin + ",";
+        csvFileLine += linearAvg + ",";
+        csvFileLine += linearMax + ",";
+        
+        // and the binary
+        csvFileLine += binaryMin + ",";
+        csvFileLine += binaryAvg + ",";
+        csvFileLine += binaryMax + ",";
+        
+        
+        
     }
 }
