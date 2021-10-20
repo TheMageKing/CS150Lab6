@@ -18,8 +18,8 @@ public interface ComplexityCount {
 
  /**
  * This will return the counter value. Changed to a long,
- * because we'll probably have more than 4 billion iterations
- * 
+ * because we'll have more than 4 billion iterations, as
+ * 100,000 squared (a lower target than the full million) is 10 billion)
  *
  * @return The returned counter.
  */

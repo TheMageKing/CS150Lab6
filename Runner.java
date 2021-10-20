@@ -1,4 +1,5 @@
 import java.io.FileWriter;
+import java.util.Random;
 
 /**
  * This class is responsible for actually running the tests.
@@ -25,7 +26,9 @@ public class Runner
         }
         
         // get a list of the N-values we will be using
-        int[] nVals = {10,100,1000,10_000,100_000,1_000_000};
+        //int[] nVals = {10,100,1_000,10_000,100_000,1_000_000};
+        // make it short for testing
+        int[] nVals = {10,100,1000};
         
         // now, for the multithreading.  Lets make an array to hold the threads
         // I created.  this way, I can get a 'progress bar'
@@ -45,6 +48,8 @@ public class Runner
                 Thread t = new Thread(() ->runAndEvaluateSorts(k,i,fileOutput));
                 // place ThreadThulu in the array
                 threads[dex++] = t;
+                // now let 'er rip
+                t.start();
             }
         }
         
@@ -52,8 +57,22 @@ public class Runner
         
         // loop until all threads are done
         boolean allDone = false;
-        
-        
+        while(!allDone){
+            // count how many are done
+            int numDone = 0;
+            for(Thread t : threads){
+                if(!t.isAlive()){
+                    numDone++;
+                }
+            }
+            System.out.printf("Progress: %d3/%d3%n",numDone,threads.length);
+            if(numDone == threads.length-1){
+                // yes, we don't bother changing allDone.  i
+                // can never decide how to structure a loop like this
+                break;
+            }
+        }
+        System.out.println("goodbye!");
     }
     
     /**
@@ -74,6 +93,60 @@ public class Runner
      * I know what firey torches I am juggling here.
      */
     public static void runAndEvaluateSorts(int seed, int N, FileWriter w){
+        // we'll be using and re-using this variable, usually with the
+        // same seed.
+        Random numberForge = new Random(seed);
         
+        // now build our data array
+        int [] data = new int[N];
+        for(int i = 0; i < N; i++){
+            data[i] = numberForge.nextInt();
+        }
+        // now build our sorter objects, being sure to avoid
+        // them both just sorting the same array
+        BubbleSort bubSorter = new BubbleSort(data.clone());
+        FasterBubbleSort fastSorter = new FasterBubbleSort(data);
+        
+        // run the algorithms
+        // the lab mentions putting them in an array, than looping through it:
+        // that seems very extra, and it's not in the requirements
+        bubSorter.run_algorithm();
+        fastSorter.run_algorithm();
+        // the variable "data" is now sorted, 
+        // because we let it alias in fastSorter
+        
+        // build the searcher objects, letting the array alias
+        // this avoids an O(N) copy, which will take a bit 
+        LinearSearch linSearcher = new LinearSearch(data);
+        BinarySearch binSearcher = new BinarySearch(data);
+        
+        // reset our RNG to one more than the seed, getting a whole new
+        // sequence of values, so that we don't just search for the values
+        // in order
+        numberForge = new Random(seed+1);
+        
+        // declare the min/max/avg variables for the searches
+        // we initialize in the first loop
+        long linearMin,linearMax,linearAvg;
+        long binaryMin,binaryMax,binaryAvg;
+        
+        // now, lets go!
+        for(int i = 0; i < N; i++){
+            // get a target (this also resets the counter)
+            int target = numberForge.nextInt();
+            linSearcher.resetSearchTarget(target);
+            binSearcher.resetSearchTarget(target);
+            
+            // find the target
+            linSearcher.run_algorithm();
+            binSearcher.run_algorithm();
+            
+            // see what we found
+            long linComplexity = linSearcher.result();
+            long binComplexity = binSearcher.result();
+            
+            // update the maxes and mins accordingly
+            linearMin=Math.min(linearMin,linComplexity);
+        }
     }
 }

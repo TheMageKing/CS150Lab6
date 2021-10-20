@@ -45,7 +45,7 @@ public class BinarySearch implements ComplexityCount
  int high = data.length - 1;
 
  while(high >= low) {
-
+incr();
  mid = (high + low)/2;
 
  if (data[mid] < numberToFind) { // search to the right
